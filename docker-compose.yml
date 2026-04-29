@@ -1,0 +1,8 @@
+services:
+  app:
+    image: ghcr.io/yazdipour/githubstore:${GITHUBSTORE_IMAGE_TAG:-latest}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yml:/app/config.yml
+    restart: unless-stopped
