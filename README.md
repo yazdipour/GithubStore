@@ -11,7 +11,7 @@ GithubStore reads each configured repository's latest GitHub release and adds th
 
 ## Screenshot of the generated source in SideStore:
 
-![SideStore screenshot](./imgs/store.jpg)
+<img src="./imgs/store.jpg" alt="SideStore screenshot" height="420" />
 
 ## Quick Setup
 
@@ -28,17 +28,15 @@ services:
     restart: unless-stopped
 ```
 
-2. Create `config.yml` (or copy from `config.example.yml`).
-3. Edit `config.yml` and add one or more GitHub repository URLs:
-
+2. Create `config.yml` (or copy from `config.example.yml`) and configure:
 
 ```yaml
 server:
-  base_url: http://localhost:8080 # set to the reachable URL if accessing from another device
-  ui_config: false # set to true to enable the web UI for adding/deleting repositories
+  base_url: http://localhost:8080 # Set reachable URL if accessing from another device
+  ui_config: false # Set true to enable web UI for managing repositories
 
 github:
-  token: "" # optional, or set GITHUB_TOKEN. Used to increase GitHub API rate limits from 60 to 5000 requests per hour.
+  token: "" # Optional. Increases API rate limits from 60 to 5000 req/hr
 
 source:
   name: GithubStore
@@ -68,28 +66,16 @@ Or add repository entries under `repositories` inside `config.yml`. GithubStore 
 
 ```yaml
 repositories:
-  - url: https://github.com/example/example-ios-app # Repo with releases containing .ipa assets
+  - url: https://github.com/example/example-ios-app
     tint_color: "#24292F"
     icon: imgs/ShaFace-small.png
-
-  - url: https://github.com/example/another-ios-app
-    tint_color: "#f50d0d"
-    icon: https://img.icons8.com/dusk/1200/youtube-play.jpg
 ```
 
-1. Start the server:
+4. Start the server: `docker compose up -d`
 
-```bash
-docker compose up -d
-```
+5. Add the source URL in AltStore, SideStore, or LiveContainer: `http://localhost:8080/source.json`
 
-6. Add the source URL in AltStore, SideStore, or LiveContainer:
-
-```text
-http://localhost:8080/source.json
-```
-
-On an iPhone on the same Wi-Fi, set `server.base_url` to the reachable LAN URL. For example, if your computer LAN IP is `192.168.1.50` and Docker maps host port `8080`, use `http://192.168.1.50:8080/source.json`.
+*Note: Replace `localhost` with your computer's IP if adding from a phone (e.g., `http://192.168.1.50:8080/source.json`).*
 
 ## How IPA Files Work
 
