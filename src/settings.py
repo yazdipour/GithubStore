@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from re import sub
 from typing import Any
+from urllib.parse import urlparse
 
 from ruamel.yaml import YAML
 
@@ -93,6 +94,14 @@ def _slug(value: str) -> str:
     return slug or "source"
 
 
+def _repo_name_from_url(value: str) -> str:
+    parsed = urlparse(value if "://" in value else f"https://{value}")
+    parts = [part for part in parsed.path.strip("/").split("/") if part]
+    if len(parts) >= 2:
+        return parts[1].removesuffix(".git")
+    return value.rstrip("/").split("/")[-1].removesuffix(".git")
+
+
 def _dedupe_slug(slug: str, used: set[str]) -> str:
     candidate = slug
     index = 2
@@ -140,7 +149,8 @@ def _load_repositories(default_tint_color: str) -> tuple[RepositoryConfig, ...]:
         if not url:
             continue
 
-        name = _value(repo_data, "name") or url.rstrip("/").split("/")[-1]
+        repo_name = _repo_name_from_url(url)
+        name = _value(repo_data, "name") or repo_name
         slug = _dedupe_slug(_slug(_value(repo_data, "slug") or name), used_slugs)
         tint_color = _value(repo_data, "tint_color") or default_tint_color
         icon = _value(repo_data, "icon")

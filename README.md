@@ -64,19 +64,15 @@ By setting `server.ui_config: true` in `config.yml`, you can access the web UI a
 
 ![UI screenshot](./imgs/config.jpg)
 
-Or Add URLs under `repositories` inside `config.yml`:
+Or add repository entries under `repositories` inside `config.yml`. GithubStore uses each GitHub repo name for the app name and slug by default:
 
 ```yaml
 repositories:
-  - url: https://github.com/example/example-ios-app # Address of GitHub repository with releases containing .ipa assets
-    name: Example App
-    slug: example-app
+  - url: https://github.com/example/example-ios-app # Repo with releases containing .ipa assets
     tint_color: "#24292F"
     icon: imgs/ShaFace-small.png
 
   - url: https://github.com/example/another-ios-app
-    name: Another App
-    slug: another-app
     tint_color: "#f50d0d"
     icon: https://img.icons8.com/dusk/1200/youtube-play.jpg
 ```
@@ -95,11 +91,11 @@ http://localhost:8080/source.json
 
 On an iPhone on the same Wi-Fi, set `server.base_url` to the reachable LAN URL. For example, if your computer LAN IP is `192.168.1.50` and Docker maps host port `8080`, use `http://192.168.1.50:8080/source.json`.
 
-## How IPA Selection Works
+## How IPA Files Work
 
-Each repository contributes at most one app. GithubStore calls GitHub's latest release API for each repository and chooses one `.ipa` asset from that release. If a release contains multiple `.ipa` files, debug or symbol-looking files are deprioritized and the largest remaining IPA is used.
+Each repository contributes one app entry for each `.ipa` asset on the latest GitHub release. If a release contains multiple `.ipa` files, GithubStore includes all of them, sorting normal-looking files before debug or symbol-looking files and larger files first within each group.
 
-If a repository has no latest release or no `.ipa` asset on that release, the source includes a placeholder entry describing the error and no installable versions for that app.
+If a repository has no latest release or no `.ipa` asset on that release, the source includes an error entry for that repository.
 
 ## Developer Setup
 
@@ -111,6 +107,10 @@ docker compose -f docker-compose.local.yml up --build
 ```
 
 The generated source is also available at `/source.json`; if you change `source.slug`, it is additionally available at `/{source.slug}.json`.
+
+## AI Acknowledgment
+
+This project was built with the assistance of AI tools for code generation and refactoring.
 
 ## License
 

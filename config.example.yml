@@ -18,13 +18,9 @@ source:
 
 repositories:
   - url: https://github.com/example/example-ios-app
-    name: Example App
-    slug: example-app
     tint_color: "#24292F"
     icon: imgs/ICON-120-blue.png
 
   - url: https://github.com/example/another-ios-app
-    name: Another App
-    slug: another-app
     tint_color: "#0969DA"
     icon: imgs/ICON-120-green.png

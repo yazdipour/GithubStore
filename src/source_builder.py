@@ -85,11 +85,11 @@ def _asset_sort_key(asset: dict) -> tuple[int, int]:
     return penalty, -size
 
 
-def _pick_ipa_asset(release: dict, repo: GithubRepo) -> dict:
+def _release_ipa_assets(release: dict, repo: GithubRepo) -> list[dict]:
     assets = sorted(_ipa_assets(release), key=_asset_sort_key)
     if not assets:
         raise GithubReleaseError(f"No .ipa asset found on latest release for {repo.owner}/{repo.name}")
-    return assets[0]
+    return assets
 
 
 def _clean_name(value: str) -> str:
@@ -99,6 +99,11 @@ def _clean_name(value: str) -> str:
     name = re.sub(r"[_\-.]+", " ", name)
     name = re.sub(r"\s+", " ", name).strip()
     return name or "GitHub App"
+
+
+def _identifier_component(value: str) -> str:
+    component = re.sub(r"[^a-z0-9]+", ".", value.lower()).strip(".")
+    return component or "app"
 
 
 def _release_version(release: dict) -> str:
@@ -141,15 +146,20 @@ def _app_from_release(
     repo: GithubRepo,
     release: dict,
     asset: dict,
+    include_asset_identity: bool,
 ) -> dict:
     filename = str(asset.get("name") or f"{repo.name}.ipa")
     version = _release_version(release)
     description = _description(release, repo)
     download_url = str(asset["browser_download_url"])
+    name = _clean_name(filename) if include_asset_identity else repo_config.name
+    bundle_identifier = f"github.{repo.owner.lower()}.{repo.name.lower()}"
+    if include_asset_identity:
+        bundle_identifier = f"{bundle_identifier}.{_identifier_component(Path(filename).stem)}"
 
     return {
-        "name": repo_config.name or _clean_name(filename),
-        "bundleIdentifier": f"github.{repo.owner.lower()}.{repo.name.lower()}",
+        "name": name,
+        "bundleIdentifier": bundle_identifier,
         "developerName": repo.owner,
         "subtitle": f"{repo.owner}/{repo.name}",
         "localizedDescription": description,
@@ -168,11 +178,15 @@ def _app_from_release(
     }
 
 
-def _build_app(settings: Settings, repo_config: RepositoryConfig) -> dict:
+def _build_apps(settings: Settings, repo_config: RepositoryConfig) -> list[dict]:
     repo = _repo_from_url(repo_config.url)
     release = _latest_release(settings, repo)
-    asset = _pick_ipa_asset(release, repo)
-    return _app_from_release(settings, repo_config, repo, release, asset)
+    assets = _release_ipa_assets(release, repo)
+    include_asset_identity = len(assets) > 1
+    return [
+        _app_from_release(settings, repo_config, repo, release, asset, include_asset_identity)
+        for asset in assets
+    ]
 
 
 async def build_source(settings: Settings) -> dict:
@@ -187,7 +201,7 @@ async def build_source(settings: Settings) -> dict:
     errors: list[dict[str, str]] = []
 
     results = await asyncio.gather(
-        *[asyncio.to_thread(_build_app, settings, repo) for repo in settings.repositories],
+        *[asyncio.to_thread(_build_apps, settings, repo) for repo in settings.repositories],
         return_exceptions=True,
     )
     for repo_config, result in zip(settings.repositories, results, strict=True):
@@ -200,7 +214,7 @@ async def build_source(settings: Settings) -> dict:
                 }
             )
             continue
-        source["apps"].append(result)
+        source["apps"].extend(result)
 
     if errors:
         source["errors"] = errors

@@ -284,17 +284,14 @@ def _repo_list() -> str:
 
 def _add_repo_form() -> str:
     tint_color = escape(settings.source_tint_color)
+    icon = escape(settings.source_icon)
     return f"""
 <form class="form-grid" method="post" action="/repositories">
   <input name="csrf_token" type="hidden" value="{escape(csrf_token)}">
   <label><span>GitHub repository URL</span><input name="url" type="url" placeholder="https://github.com/owner/repo" required></label>
   <div class="form-row">
-    <label><span>Name</span><input name="name" placeholder="App name"></label>
-    <label><span>Slug</span><input name="slug" placeholder="app-name" pattern="[A-Za-z0-9_-]+"></label>
-  </div>
-  <div class="form-row">
     <label><span>Tint color</span><input name="tint_color" value="{tint_color}" pattern="#[0-9A-Fa-f]{{6}}"></label>
-    <label><span>Icon URL or path</span><input name="icon" placeholder="https://example.com/icon.png"></label>
+    <label><span>Icon URL or path</span><input name="icon" value="{icon}" placeholder="https://example.com/icon.png"></label>
   </div>
   <button type="submit">Add repository</button>
 </form>"""
@@ -460,13 +457,10 @@ async def add_repository(request: Request):
     if len(parts) < 2:
         raise HTTPException(status_code=400, detail="Repository URL must include owner and repo")
 
-    default_name = parts[1].removesuffix(".git")
     new_repo = {
         "url": parsed.geturl(),
-        "name": form.get("name") or default_name,
-        "slug": form.get("slug") or default_name,
         "tint_color": form.get("tint_color") or settings.source_tint_color,
-        "icon": form.get("icon") or "",
+        "icon": form.get("icon") or settings.source_icon,
     }
 
     data = _read_config_file()
