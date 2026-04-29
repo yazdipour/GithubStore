@@ -9,6 +9,10 @@ GithubStore reads each configured repository's latest GitHub release and adds th
 > [!NOTE]
 > If you are looking to have an IPA repository from Telegram channels, check out [TeleStore](https://github.com/yazdipour/TeleStore).
 
+## Screenshot of the generated source in SideStore:
+
+![SideStore screenshot](./imgs/store.jpg)
+
 ## Quick Setup
 
 1. Create `docker-compose.yml`:
@@ -58,6 +62,8 @@ By setting `server.ui_config: true` in `config.yml`, you can access the web UI a
 > 
 > We recommend after adding repositories via the UI, to disable it again by setting `ui_config: false` and restarting the server.
 
+![UI screenshot](./imgs/config.jpg)
+
 Or Add URLs under `repositories` inside `config.yml`:
 
 ```yaml
@@ -75,7 +81,7 @@ repositories:
     icon: https://img.icons8.com/dusk/1200/youtube-play.jpg
 ```
 
-5. Start the server:
+1. Start the server:
 
 ```bash
 docker compose up -d

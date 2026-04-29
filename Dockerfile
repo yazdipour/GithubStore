@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src ./src
-COPY imgs/ ./imgs/
+COPY imgs/ShaFace-small.png ./imgs/ShaFace-small.png
 
 EXPOSE 8080
 
