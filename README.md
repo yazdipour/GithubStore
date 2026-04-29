@@ -7,16 +7,30 @@ Self-hosted AltStore / SideStore / LiveContainer source generated from GitHub re
 GithubStore reads each configured repository's latest GitHub release and adds the first suitable `.ipa` release asset to one combined source.
 
 > [!NOTE]
-> If you are looking to ipa repository from Telegram channels, check out [TeleStore](https://github.com/yazdipour/TeleStore).
+> If you are looking to have an IPA repository from Telegram channels, check out [TeleStore](https://github.com/yazdipour/TeleStore).
 
 ## Quick Setup
 
-1. Create `config.yml`: `cp config.example.yml config.yml`
-2. Edit `config.yml` and add one or more GitHub repository URLs:
+1. Create `docker-compose.yml`:
+
+```yaml
+services:
+  app:
+    image: ghcr.io/yazdipour/githubstore:latest
+    ports:
+      - "8080:8080" # if port 8080 is already in use, change the left side to an available port, e.g. "8081:8080" and do not forget to update the base_url in config.yml accordingly.
+    volumes:
+      - ./config.yml:/app/config.yml
+    restart: unless-stopped
+```
+
+2. Create `config.yml` (or copy from `config.example.yml`).
+3. Edit `config.yml` and add one or more GitHub repository URLs:
+
 
 ```yaml
 server:
-  base_url: http://localhost:8080
+  base_url: http://localhost:8080 # set to the reachable URL if accessing from another device
   ui_config: false # set to true to enable the web UI for adding/deleting repositories
 
 github:
@@ -33,7 +47,7 @@ source:
 repositories: []
 ```
 
-3. Add repository:
+4. Add repository:
 
 Adding through UI:
 
@@ -61,13 +75,13 @@ repositories:
     icon: https://img.icons8.com/dusk/1200/youtube-play.jpg
 ```
 
-4. Start the server:
+5. Start the server:
 
 ```bash
 docker compose up -d
 ```
 
-5. Add the source URL in AltStore, SideStore, or LiveContainer:
+6. Add the source URL in AltStore, SideStore, or LiveContainer:
 
 ```text
 http://localhost:8080/source.json
